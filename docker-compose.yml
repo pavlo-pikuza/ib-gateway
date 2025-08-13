@@ -1,0 +1,35 @@
+services:
+  ibgateway:
+    image: ghcr.io/gnzsnz/ib-gateway:stable
+    container_name: ibgateway
+    restart: unless-stopped
+    stop_grace_period: 2m
+    environment:
+      - TZ=${TZ}
+      - JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS}
+      - TWS_USERID=${TWS_USERID}
+      - TWS_PASSWORD=${TWS_PASSWORD}
+      - TRADING_MODE=${TRADING_MODE}
+      - TWSAPI_PORT=${TWS_API_PORT}
+      - IBC_TRUSTED_IPS=${IBC_TRUSTED_IPS}
+      - READ_ONLY_API=${READ_ONLY_API}
+      - TWOFA_DEVICE=${TWOFA_DEVICE}
+      - TWOFA_EXIT_INTERVAL=${TWOFA_EXIT_INTERVAL}
+      - TWOFA_TIMEOUT_ACTION=${TWOFA_TIMEOUT_ACTION}
+      - RELOGIN_AFTER_TWOFA_TIMEOUT=${RELOGIN_AFTER_TWOFA_TIMEOUT}
+      - EXISTING_SESSION_DETECTED_ACTION=${EXISTING_SESSION_DETECTED_ACTION}
+      - AUTO_RESTART_TIME=${AUTO_RESTART_TIME}
+      - AUTO_LOGOFF_TIME=${AUTO_LOGOFF_TIME}
+    ports:
+      - "127.0.0.1:${TWS_API_PORT}:${TWS_API_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/${TWS_API_PORT} && exec 3>&- 3<&-'"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
